@@ -21,6 +21,7 @@ HEIGHT= 64
 i2c = I2C(0, scl=Pin(17), sda = Pin(16), freq=200000) # 8, 9 are the default values
 oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 
+# Helper functions
 def displayImage(img, sizeX, sizeY):
     oled.fill(0)
     fb = framebuf.FrameBuffer(img, sizeX, sizeY, framebuf.MONO_HLSB) # This means monochrome
@@ -33,9 +34,15 @@ def displayAnimation(stages, sizeX, sizeY):
         displayImage(i, sizeX, sizeY)
 
 
-oled.fill(0) # CLEAR SCREEN
-while True:
+# State functions
+def awake():
     displayImage(EYES, 64, 64)
     time.sleep(random.randint(1, 3))
     displayAnimation(BLINK, 64, 64)
+    
+def sleep_transition():
+    displayImage(SWITCH_TO_SLEEP[0], 64, 64)
+
+oled.fill(0) # CLEAR SCREEN
+while True:
     # oled.text("Hello, World!", 0,0)
