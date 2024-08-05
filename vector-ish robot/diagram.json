@@ -4,10 +4,10 @@
   "editor": "wokwi",
   "parts": [
     {
-      "type": "wokwi-pi-pico",
+      "type": "board-pi-pico-w",
       "id": "pico",
-      "top": -89.55,
-      "left": -15.6,
+      "top": -99.25,
+      "left": -25.25,
       "attrs": { "env": "micropython-20231227-v1.22.0" }
     },
     {
