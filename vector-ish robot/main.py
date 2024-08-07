@@ -18,36 +18,36 @@ from dht import DHT22
 from urtc import DS1307
 import utime
 
-i2c = I2C(0,scl = Pin(1),sda = Pin(0),freq = 400000)
-rtc = DS1307(i2c)
+tempSensor = DHT22(4)
+
+# Animation setup
+STATE = "s" # A for awake, S for asleep FIX THIS WHEN YOU SUBMIT IT
+WIDTH = 128
+HEIGHT= 64
+i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=200000) # 8, 9 are the default values
+oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
+
+# Time setup
+i2c1 = I2C(1,scl=Pin(3),sda=Pin(2))
+rtc = DS1307(i2c1)
 
 # Gonna keep this for debugging
 year = 2024
 month = 8
 date = 7
 day = 3
-hour = 20
-minute = 20
-second = 50
+hour = 6
+minute = 59
+second = 30
 
 now = (year,month,date,day,hour,minute,second,0)
 rtc.datetime(now)
 
-tempSensor = DHT22(2)
-
-# Animation setup
-STATE = "a" # A for awake, S for asleep
-WIDTH = 128
-HEIGHT= 64
-i2c = I2C(0, scl=Pin(17), sda = Pin(16), freq=200000) # 8, 9 are the default values
-oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
-
-# Time setup
-
-# wintertime / Summertime
-GMT_OFFSET = 3600 * 1 # 3600 = 1 h (wintertime)
-#GMT_OFFSET = 3600 * 2 # 3600 = 1 h (summertime)
-
+# SLEEP_MINUTE = random.randint(0,30)
+# WAKE_MINUTE = random.randint(0,30)
+# JUST FOR TESTING
+SLEEP_MINUTE = 0
+WAKE_MINUTE = 0
 
 
 # Helper functions
@@ -78,7 +78,7 @@ def awake(temp, humidity):
     if random.randint(0, 100) > 80: # This number works quite well
         displayAnimation(BLINK, 64, 64)
     elif random.randint(0, 100) > 95: # Checking for cold
-        if temp < 13:
+        if temp < 15:
             for i in range(15):
                 displayAnimation(SHIVERING, 64, 64)
     
@@ -113,16 +113,20 @@ oled.fill(0) # CLEAR SCREEN
 awake_transition()
 while True:
     temp, humidity = getTemp()
-    (year,month,date,day,hour,minute,second,p1)=rtc.datetime() # Going to change the state thing next
+    (year,month,date,day,hour,minute,second,p1)=rtc.datetime()
 
-    if STATE == "a":
-        awake(temp, humidity)
-        if random.randint(1,1000) > 999: # Since this runs really fast this value is good
-            STATE = "s"
+    if hour >= 22 and minute >= SLEEP_MINUTE: # Sleep!
+        if STATE == "a": # Just slept
             sleep_transition()
-    if STATE == "s":
+            WAKE_MINUTE = random.randint(0,30)
+            STATE = "s"
         sleep()
-        if random.randint(1,1000) > 999: # I also just did a lot of trial and error and found this works best
-            STATE = "a"
+    elif hour >= 7 and minute >= WAKE_MINUTE: # Awake!
+        if STATE == "s": # Just woke up
             awake_transition()
-    oled.text("Hello, World!", 0,0)
+            SLEEP_MINUTE = random.randint(0,30)
+            state = "a"
+        awake(temp, humidity)
+    else:
+        sleep() # Outside case
+        STATE = "s"
