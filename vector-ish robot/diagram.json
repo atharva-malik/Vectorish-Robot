@@ -37,7 +37,7 @@
     [ "pico:3V3", "rtc1:5V", "red", [ "v-57.6", "h-134.09", "v-76.4" ] ],
     [ "rtc1:GND", "pico:GND.8", "black", [ "h0" ] ],
     [ "rtc1:SCL", "pico:GP1", "green", [ "h-28.8", "v86.2" ] ],
-    [ "rtc1:SQW", "pico:GP0", "green", [ "h-38.4", "v66.6" ] ]
+    [ "rtc1:SDA", "pico:GP0", "green", [ "h-38.4", "v86.1" ] ]
   ],
   "dependencies": {}
 }

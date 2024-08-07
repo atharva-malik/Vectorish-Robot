@@ -5,23 +5,33 @@
 # Buzzer: Buzzer
 # MPU6050: Accelerometer
 # PinOut: https://www.raspberrypi.com/documentation/microcontrollers/images/picow-pinout.svg
-
-# First I want to get the screen working: https://wokwi.com/projects/344894074741850707
-# Something like a default animation: https://animator.wokwi.com/
 # https://codepen.io/KjeldSchmidt/pen/KaRPzX
 
 # Animation Imports
-from machine import Pin, I2C, RTC
+from machine import Pin, I2C
 from ssd1306 import SSD1306_I2C
 import framebuf, time, random
 from animations import *
 
 # Time Imports
-import utime
-from urtc import DS1307
-
-# Temp Imports
 from dht import DHT22
+from urtc import DS1307
+import utime
+
+i2c = I2C(0,scl = Pin(1),sda = Pin(0),freq = 400000)
+rtc = DS1307(i2c)
+
+# Gonna keep this for debugging
+year = 2024
+month = 8
+date = 7
+day = 3
+hour = 20
+minute = 20
+second = 50
+
+now = (year,month,date,day,hour,minute,second,0)
+rtc.datetime(now)
 
 tempSensor = DHT22(2)
 
@@ -103,7 +113,9 @@ oled.fill(0) # CLEAR SCREEN
 awake_transition()
 while True:
     temp, humidity = getTemp()
-    if STATE == "a": #TODO: Make this more advanced using api keys
+    (year,month,date,day,hour,minute,second,p1)=rtc.datetime() # Going to change the state thing next
+
+    if STATE == "a":
         awake(temp, humidity)
         if random.randint(1,1000) > 999: # Since this runs really fast this value is good
             STATE = "s"
