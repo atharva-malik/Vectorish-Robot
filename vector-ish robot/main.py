@@ -23,6 +23,11 @@ import utime as time
 import usocket as socket
 import ustruct as struct
 
+# Temp Imports
+from dht import DHT22
+
+tempSensor = DHT22(2)
+
 # Animation setup
 STATE = "a" # A for awake, S for asleep
 WIDTH = 128
@@ -64,28 +69,28 @@ def setTimeRTC():
     
 
   
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(ssid, password)
-    
-max_wait = 10
-print('Waiting for connection')
-while max_wait > 10:
-    if wlan.status() < 0 or wlan.status() >= 3:
-        break
-    max_wait -= 1    
-    sleep(1)
-status = None
-if wlan.status() != 3:
-    raise RuntimeError('Connections failed')
-else:
-    status = wlan.ifconfig()
-    print('connection to', ssid,'succesfull established!', sep=' ')
-    print('IP-adress: ' + status[0])
-ipAddress = status[0]
+# wlan = network.WLAN(network.STA_IF)
+# wlan.active(True)
+# wlan.connect(ssid, password)
+
+# max_wait = 10
+# print('Waiting for connection')
+# while max_wait > 10:
+#     if wlan.status() < 0 or wlan.status() >= 3:
+#         break
+#     max_wait -= 1    
+#     sleep(1)
+# status = None
+# if wlan.status() != 3:
+#     raise RuntimeError('Connections failed')
+# else:
+#     status = wlan.ifconfig()
+#     print('connection to', ssid,'succesfull established!', sep=' ')
+#     print('IP-adress: ' + status[0])
+# ipAddress = status[0]
 rtc = RTC()
 # Set time
-setTimeRTC()
+# setTimeRTC()
 
 
 # Helper functions
@@ -100,6 +105,15 @@ def displayAnimation(stages, sizeX, sizeY, speed=0.01):
         time.sleep(speed)
         displayImage(i, sizeX, sizeY)
 
+def getTemp():
+    try:
+        tempSensor.measure()
+        temp = tempSensor.temperature()
+        humidity = tempSensor.humidity()
+    except Exception as e:
+        print("Toundi", e)
+        temp, humidity = -1
+    return temp, humidity
 
 # State functions
 def awake():
@@ -137,6 +151,8 @@ def sleep():
 oled.fill(0) # CLEAR SCREEN
 awake_transition()
 while True:
+    temp, humidity = getTemp()
+    print(temp, humidity)
     if STATE == "a": #TODO: Make this more advanced using api keys
         awake()
         if random.randint(1,100) > 95: # Since this runs really fast this value is good
