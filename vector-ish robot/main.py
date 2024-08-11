@@ -12,6 +12,7 @@ from machine import Pin, I2C
 from ssd1306 import SSD1306_I2C
 import framebuf, time, random
 from animations import *
+import accel
 
 # Time Imports
 from dht import DHT22
@@ -21,7 +22,7 @@ import utime
 tempSensor = DHT22(4)
 
 # Animation setup
-STATE = "s" # A for awake, S for asleep FIX THIS WHEN YOU SUBMIT IT
+STATE = "a" # A for awake, S for asleep FIX THIS WHEN YOU SUBMIT IT
 WIDTH = 128
 HEIGHT= 64
 i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=200000) # 8, 9 are the default values
@@ -31,17 +32,22 @@ oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 i2c1 = I2C(1,scl=Pin(3),sda=Pin(2))
 rtc = DS1307(i2c1)
 
+# Accelerometer Setup
+p16 = Pin(16, Pin.OUT)
+i2c2 = I2C(1, sda=Pin(10), scl=Pin(11))
+p16.value(1)
+
 # Gonna keep this for debugging
 year = 2024
 month = 8
 date = 7
 day = 3
-hour = 6
+hour = 7
 minute = 59
 second = 30
 
 now = (year,month,date,day,hour,minute,second,0)
-rtc.datetime(now)
+# rtc.datetime(now)
 
 # SLEEP_MINUTE = random.randint(0,30)
 # WAKE_MINUTE = random.randint(0,30)
@@ -110,8 +116,11 @@ def sleep():
     displayAnimation(SLEEP, 64, 64, 0.3)
 
 oled.fill(0) # CLEAR SCREEN
+accel.mpu6050_init(i2c2)
 awake_transition()
 while True:
+    print("Accelerometer:\t", accel.mpu6050_get_accel(i2c2), "g") #Print Accelerometer values (X,Y,Z) 
+    print("Gyroscope:\t", accel.mpu6050_get_gyro(i2c2), "°/s") #Print Gyroscope values (X,Y,Z)
     temp, humidity = getTemp()
     (year,month,date,day,hour,minute,second,p1)=rtc.datetime()
 
