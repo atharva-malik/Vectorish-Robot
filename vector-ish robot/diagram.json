@@ -24,7 +24,6 @@
       "left": -159,
       "attrs": { "temperature": "19.8" }
     },
-    { "type": "wokwi-ds1307", "id": "rtc1", "top": -207, "left": -76.7, "attrs": {} },
     { "type": "wokwi-mpu6050", "id": "imu1", "top": 71.02, "left": -170.48, "attrs": {} }
   ],
   "connections": [
@@ -33,15 +32,11 @@
     [ "pico:GP17", "oled1:SCL", "blue", [ "h211.51", "v-278.36" ] ],
     [ "pico:GP16", "oled1:SDA", "violet", [ "h20.4", "v-124.8", "h66.31", "v-163.16" ] ],
     [ "dht1:GND", "pico:GND.8", "black", [ "h28.8", "v-105.6" ] ],
-    [ "rtc1:GND", "pico:GND.8", "black", [ "h0" ] ],
     [ "dht1:SDA", "pico:GP4", "green", [ "h67.3", "v-76.8" ] ],
-    [ "pico:GP3", "rtc1:SCL", "green", [ "h0" ] ],
-    [ "rtc1:SDA", "pico:GP2", "green", [ "h0" ] ],
     [ "pico:GND.4", "imu1:GND", "black", [ "h0" ] ],
     [ "pico:GP10", "imu1:SDA", "green", [ "h0" ] ],
     [ "imu1:SCL", "pico:GP11", "green", [ "v0" ] ],
-    [ "imu1:VCC", "pico:3V3", "red", [ "v0" ] ],
-    [ "imu1:AD0", "pico:3V3", "green", [ "v0" ] ]
+    [ "imu1:VCC", "pico:3V3", "red", [ "v0" ] ]
   ],
   "dependencies": {}
 }

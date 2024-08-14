@@ -15,45 +15,66 @@ from animations import *
 import accel
 
 # Time Imports
+import network
+import urequests
+
+# Temp imports
 from dht import DHT22
-from urtc import DS1307
-import utime
 
 tempSensor = DHT22(4)
+
+# TIME
+# Connect to network
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+
+# Fill in your network name (ssid) and password here:
+ssid = ''
+password = ''
+# wlan.connect(ssid, password)
 
 # Animation setup
 STATE = "a" # A for awake, S for asleep FIX THIS WHEN YOU SUBMIT IT
 WIDTH = 128
 HEIGHT= 64
-i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=200000) # 8, 9 are the default values
+i2c = I2C(0, scl=Pin(17), sda=Pin(16), freq=400000) # 8, 9 are the default values
 oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 
-# Time setup
-i2c1 = I2C(1,scl=Pin(3),sda=Pin(2))
-rtc = DS1307(i2c1)
-
 # Accelerometer Setup
-p16 = Pin(16, Pin.OUT)
 i2c2 = I2C(1, sda=Pin(10), scl=Pin(11))
-p16.value(1)
 
 # Gonna keep this for debugging
 year = 2024
 month = 8
 date = 7
-day = 3
 hour = 7
 minute = 59
 second = 30
-
-now = (year,month,date,day,hour,minute,second,0)
-# rtc.datetime(now)
 
 # SLEEP_MINUTE = random.randint(0,30)
 # WAKE_MINUTE = random.randint(0,30)
 # JUST FOR TESTING
 SLEEP_MINUTE = 0
 WAKE_MINUTE = 0
+
+def getTime(testing=False):
+    if not testing:
+        url = "https://timeapi.io/api/Time/current/zone?timeZone=Australia/ACT"
+        r = urequests.get("http://www.google.com").json()
+        year = r["year"]
+        month = r["month"]
+        date = r["day"]
+        hour = r["hour"]
+        minute = r["minute"]
+        second = r["seconds"]
+    else:
+        year = 2024
+        month = 8
+        date = 7
+        hour = 7
+        minute = 59
+        second = 30
+    return year, month, date, hour, minute, second
 
 
 # Helper functions
@@ -122,8 +143,7 @@ while True:
     print("Accelerometer:\t", accel.mpu6050_get_accel(i2c2), "g") #Print Accelerometer values (X,Y,Z) 
     print("Gyroscope:\t", accel.mpu6050_get_gyro(i2c2), "°/s") #Print Gyroscope values (X,Y,Z)
     temp, humidity = getTemp()
-    (year,month,date,day,hour,minute,second,p1)=rtc.datetime()
-
+    year, month, date, hour, minute, second = getTime(True)
     if hour >= 22 and minute >= SLEEP_MINUTE: # Sleep!
         if STATE == "a": # Just slept
             sleep_transition()

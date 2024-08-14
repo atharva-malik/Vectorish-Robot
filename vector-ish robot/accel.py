@@ -5,7 +5,7 @@ from machine import Pin, I2C
 i2c = I2C(0, sda=Pin(0), scl=Pin(1))
 
 #Device address on the I2C bus
-MPU6050_ADDR = 0x69
+MPU6050_ADDR = 0x68
 
 #PWR_MGMT_1 memory address
 MPU6050_PWR_MGMT_1 = 0x6B
