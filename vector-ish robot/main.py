@@ -57,6 +57,7 @@ second = 30
 SLEEP_MINUTE = 0
 WAKE_MINUTE = 0
 
+# Helper Functions
 def getTime(testing=False):
     if not testing:
         url = "https://timeapi.io/api/Time/current/zone?timeZone=Australia/ACT"
@@ -76,8 +77,6 @@ def getTime(testing=False):
         second = 30
     return year, month, date, hour, minute, second
 
-
-# Helper functions
 def displayImage(img, sizeX, sizeY):
     oled.fill(0)
     fb = framebuf.FrameBuffer(img, sizeX, sizeY, framebuf.MONO_HLSB) # This means monochrome
@@ -98,6 +97,24 @@ def getTemp():
         print("Toundi", e)
         temp, humidity = -1
     return temp, humidity
+
+def checkPickupFall():
+    gs = accel.mpu6050_get_accel(i2c2)
+    rot = accel.mpu6050_get_gyro(i2c2)
+    xg = gs[0]
+    yg = gs[1]
+    zg = gs[2]
+    xrot = rot[0]
+    yrot = rot[1]
+    zrot = rot[2]
+    if zg > 1: # Sudden pick up
+        return "panic"
+    elif xg > 1 or yg > 1: # Sudden shake
+        return "shake"
+    elif zrot > 0.5 or zrot < 0.5: # Fallen down
+        return "panic"
+    else:
+        return "NA"
 
 # State functions
 def awake(temp, humidity):
@@ -136,6 +153,18 @@ def awake_transition():
 def sleep():
     displayAnimation(SLEEP, 64, 64, 0.3)
 
+def panic():
+    displayAnimation(SHIVERING, 64, 64) # The same animation will work
+
+def managePickupFall():
+    stage = checkPickupFall()
+    if stage == "NA": # This is first cuz this is gonna be the case most of the time
+        return
+    elif stage == "panic":
+        panic()
+    elif stage == "shake":
+        dizzy()
+
 oled.fill(0) # CLEAR SCREEN
 accel.mpu6050_init(i2c2)
 awake_transition()
@@ -157,5 +186,7 @@ while True:
             state = "a"
         awake(temp, humidity)
     else:
-        sleep() # Outside case
+        sleep() # Edge case
         STATE = "s"
+    
+    managePickupFall()
